@@ -1,5 +1,6 @@
 package org.knowm.xchange.jubi;
 
+import org.knowm.xchange.jubi.dto.marketdata.JubiDepth;
 import org.knowm.xchange.jubi.dto.marketdata.JubiTicker;
 import org.knowm.xchange.jubi.dto.marketdata.JubiTrade;
 
@@ -35,6 +36,10 @@ public interface Jubi {
   @GET
   @Path("orders/?coin={baseCurrency}")
   JubiTrade[] getTrades(@PathParam("baseCurrency") String baseCurrency) throws IOException;
+
+  @GET
+  @Path("depth?coin={coin}")
+  JubiDepth getDepth(@PathParam("coin") String coin) throws IOException;
 
   @GET
   @Path("orders/?coin={baseCurrency}&since={since}")

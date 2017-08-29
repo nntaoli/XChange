@@ -6,6 +6,7 @@ import org.knowm.xchange.dto.Order;
 import org.knowm.xchange.dto.account.AccountInfo;
 import org.knowm.xchange.dto.account.Balance;
 import org.knowm.xchange.dto.account.Wallet;
+import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.knowm.xchange.dto.marketdata.Ticker;
 import org.knowm.xchange.dto.marketdata.Trade;
 import org.knowm.xchange.dto.marketdata.Trades;
@@ -14,6 +15,7 @@ import org.knowm.xchange.dto.trade.OpenOrders;
 import org.knowm.xchange.dto.trade.UserTrade;
 import org.knowm.xchange.dto.trade.UserTrades;
 import org.knowm.xchange.jubi.dto.account.JubiBalance;
+import org.knowm.xchange.jubi.dto.marketdata.JubiDepth;
 import org.knowm.xchange.jubi.dto.marketdata.JubiTicker;
 import org.knowm.xchange.jubi.dto.marketdata.JubiTrade;
 import org.knowm.xchange.jubi.dto.trade.JubiOrder;
@@ -21,10 +23,7 @@ import org.knowm.xchange.jubi.dto.trade.JubiOrderHistory;
 import org.knowm.xchange.jubi.dto.trade.JubiOrderType;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Yingzhe on 3/16/2015.
@@ -115,5 +114,25 @@ public class JubiAdapters {
 
     }
     return new OpenOrders(limitOrders);
+  }
+
+    private static List<LimitOrder> adaptLimitOrders(Order.OrderType type, BigDecimal[][] list, CurrencyPair currencyPair) {
+
+        List<LimitOrder> limitOrders = new ArrayList<>(list.length);
+        for (int i = 0; i < list.length; i++) {
+            BigDecimal[] data = list[i];
+            limitOrders.add(new LimitOrder.Builder(type , currencyPair)
+                    .tradableAmount(data[1])
+                    .limitPrice(data[0])
+                    .build());
+        }
+        return limitOrders;
+    }
+
+  public static OrderBook adaptDepth(JubiDepth depth , CurrencyPair currencyPair){
+    List<LimitOrder> asks = adaptLimitOrders(Order.OrderType.ASK , depth.getAsks() , currencyPair);
+    List<LimitOrder> bids = adaptLimitOrders(Order.OrderType.BID , depth.getBids() , currencyPair);
+    Collections.reverse(asks);
+      return new OrderBook(depth.getTimestamp() ,asks , bids );
   }
 }

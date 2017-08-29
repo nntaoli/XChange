@@ -9,6 +9,7 @@ import org.knowm.xchange.exceptions.ExchangeException;
 import org.knowm.xchange.exceptions.NotAvailableFromExchangeException;
 import org.knowm.xchange.exceptions.NotYetImplementedForExchangeException;
 import org.knowm.xchange.jubi.JubiAdapters;
+import org.knowm.xchange.jubi.dto.marketdata.JubiDepth;
 import org.knowm.xchange.jubi.dto.marketdata.JubiTicker;
 import org.knowm.xchange.service.marketdata.MarketDataService;
 
@@ -36,8 +37,8 @@ public class JubiMarketDataService extends JubiMarketDataServiceRaw implements M
   @Override
   public OrderBook getOrderBook(CurrencyPair currencyPair,
       Object... args) throws ExchangeException, NotAvailableFromExchangeException, NotYetImplementedForExchangeException, IOException {
-
-    throw new NotYetImplementedForExchangeException();
+    JubiDepth depth = getDepth(currencyPair);
+    return depth != null ? JubiAdapters.adaptDepth(depth , currencyPair) : null;
   }
 
   @Override

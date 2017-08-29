@@ -3,6 +3,7 @@ package org.knowm.xchange.jubi.service;
 import org.knowm.xchange.Exchange;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.jubi.Jubi;
+import org.knowm.xchange.jubi.dto.marketdata.JubiDepth;
 import org.knowm.xchange.jubi.dto.marketdata.JubiTicker;
 import org.knowm.xchange.jubi.dto.marketdata.JubiTrade;
 import si.mazi.rescu.RestProxyFactory;
@@ -49,5 +50,9 @@ public class JubiMarketDataServiceRaw extends JubiBaseService {
     return  (args != null && args.length > 0 && args[0] != null && args[0] instanceof Long)
             ? jubi.getTradesSince(currencyPair.base.getCurrencyCode().toLowerCase(), (Long) args[0])
             : jubi.getTrades(currencyPair.base.getCurrencyCode().toLowerCase());
+  }
+
+  public JubiDepth getDepth(CurrencyPair currencyPair) throws IOException{
+    return this.jubi.getDepth(currencyPair.base.getCurrencyCode().toLowerCase());
   }
 }
