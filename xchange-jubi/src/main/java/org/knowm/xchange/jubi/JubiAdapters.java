@@ -18,9 +18,7 @@ import org.knowm.xchange.jubi.dto.account.JubiBalance;
 import org.knowm.xchange.jubi.dto.marketdata.JubiDepth;
 import org.knowm.xchange.jubi.dto.marketdata.JubiTicker;
 import org.knowm.xchange.jubi.dto.marketdata.JubiTrade;
-import org.knowm.xchange.jubi.dto.trade.JubiOrder;
-import org.knowm.xchange.jubi.dto.trade.JubiOrderHistory;
-import org.knowm.xchange.jubi.dto.trade.JubiOrderType;
+import org.knowm.xchange.jubi.dto.trade.*;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -114,6 +112,20 @@ public class JubiAdapters {
 
     }
     return new OpenOrders(limitOrders);
+  }
+
+  public static Order.OrderStatus adaptOrderStatus(JubiStatusType statusType){
+    switch (statusType){
+      case New:
+        return Order.OrderStatus.NEW;
+      case Open:
+        return Order.OrderStatus.NEW;
+      case Cancelled:
+        return Order.OrderStatus.CANCELED;
+      case Closed:
+        return Order.OrderStatus.FILLED;
+    }
+    return Order.OrderStatus.NEW;
   }
 
     private static List<LimitOrder> adaptLimitOrders(Order.OrderType type, BigDecimal[][] list, CurrencyPair currencyPair) {

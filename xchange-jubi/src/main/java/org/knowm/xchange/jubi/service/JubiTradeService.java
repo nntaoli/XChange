@@ -12,6 +12,7 @@ import org.knowm.xchange.exceptions.NotAvailableFromExchangeException;
 import org.knowm.xchange.exceptions.NotYetImplementedForExchangeException;
 import org.knowm.xchange.jubi.JubiAdapters;
 import org.knowm.xchange.jubi.dto.trade.JubiOrderHistory;
+import org.knowm.xchange.jubi.dto.trade.JubiOrderStatus;
 import org.knowm.xchange.jubi.dto.trade.JubiOrderType;
 import org.knowm.xchange.jubi.dto.trade.JubiTradeResult;
 import org.knowm.xchange.service.trade.TradeService;
@@ -21,8 +22,10 @@ import org.knowm.xchange.service.trade.params.orders.OpenOrdersParams;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Dzf on 2017/7/16.
@@ -122,7 +125,33 @@ public class JubiTradeService extends JubiTradeServiceRaw implements TradeServic
   @Override
   public Collection<Order> getOrder(
           String... orderIds) throws ExchangeException, NotAvailableFromExchangeException, NotYetImplementedForExchangeException, IOException {
-    throw new NotYetImplementedForExchangeException();
+    if (orderIds.length != 2){
+      throw new ExchangeException("must equal two parameter");
+    }
+
+    String id = orderIds[0];
+    CurrencyPair currencyPair = new CurrencyPair(orderIds[1]);
+    if (currencyPair == null){
+      throw new ExchangeException("currency pair error");
+    }
+
+    JubiOrderStatus orderStatus = super.getJubiOrderStatus(new BigDecimal(id) , currencyPair);
+    if (!orderStatus.getResult().isSuccess()){
+      return new ArrayList<>();
+    }
+
+    List<Order> orders = new ArrayList<>();
+    LimitOrder limitOrder = new LimitOrder.Builder(
+            orderStatus.getType() == JubiOrderType.Buy ? Order.OrderType.BID : Order.OrderType.ASK , currencyPair)
+            .limitPrice(orderStatus.getPrice())
+            .averagePrice(orderStatus.getAvgPrice())
+            .tradableAmount(orderStatus.getAmountOriginal())
+            .id(orderStatus.getId().toPlainString())
+            .orderStatus(JubiAdapters.adaptOrderStatus(orderStatus.getStatus()))
+            .timestamp(orderStatus.getDatetime())
+            .build();
+      orders.add(limitOrder);
+    return orders;
   }
 
 }
