@@ -1,12 +1,15 @@
 package org.knowm.xchange.bter.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.knowm.xchange.Exchange;
 import org.knowm.xchange.bter.BTERAdapters;
 import org.knowm.xchange.bter.dto.trade.BTEROpenOrders;
+import org.knowm.xchange.bter.dto.trade.BTEROrderStatus;
 import org.knowm.xchange.bter.dto.trade.BTERTrade;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.Order;
@@ -111,7 +114,23 @@ public class BTERTradeService extends BTERTradeServiceRaw implements TradeServic
   @Override
   public Collection<Order> getOrder(
       String... orderIds) throws ExchangeException, NotAvailableFromExchangeException, NotYetImplementedForExchangeException, IOException {
-    throw new NotYetImplementedForExchangeException();
+    if (orderIds.length != 2){
+      throw new ExchangeException("parameter must equal two");
+    }
+    String orderId = orderIds[0];
+    CurrencyPair pair = new CurrencyPair(orderIds[1]);
+    BTEROrderStatus orderStatus = super.getBTEROrderStatus(orderId);
+
+    List<Order> orderList = new ArrayList<>();
+    LimitOrder limitOrder = new LimitOrder.Builder(BTERAdapters.adaptOrderType(orderStatus.getType()) , pair)
+            .id(orderId)
+            .limitPrice(orderStatus.getInitialRate())
+            .tradableAmount(orderStatus.getAmount())
+            .averagePrice(orderStatus.getRate())
+            .orderStatus(BTERAdapters.adaptOrderStatus(orderStatus.getStatus()))
+            .build();
+    orderList.add(limitOrder);
+    return orderList;
   }
 
 }

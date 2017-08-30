@@ -24,6 +24,7 @@ import org.knowm.xchange.bter.dto.trade.BTEROpenOrders;
 import org.knowm.xchange.bter.dto.trade.BTERTrade;
 import org.knowm.xchange.currency.Currency;
 import org.knowm.xchange.currency.CurrencyPair;
+import org.knowm.xchange.dto.Order;
 import org.knowm.xchange.dto.Order.OrderType;
 import org.knowm.xchange.dto.account.Balance;
 import org.knowm.xchange.dto.account.Wallet;
@@ -121,6 +122,18 @@ public final class BTERAdapters {
   public static OrderType adaptOrderType(BTEROrderType cryptoTradeOrderType) {
 
     return (cryptoTradeOrderType.equals(BTEROrderType.BUY)) ? OrderType.BID : OrderType.ASK;
+  }
+
+  public static Order.OrderStatus adaptOrderStatus(String bterOrderStatus){
+    if ("cancelled".equals(bterOrderStatus)){
+      return Order.OrderStatus.CANCELED;
+    } else if ("open".equals(bterOrderStatus)){
+      return Order.OrderStatus.NEW;
+    } else if ( "closed".equals(bterOrderStatus)){
+      return Order.OrderStatus.FILLED;
+    }
+    //System.out.println(bterOrderStatus);
+    return Order.OrderStatus.NEW;
   }
 
   public static Trade adaptTrade(BTERPublicTrade trade, CurrencyPair currencyPair) {
