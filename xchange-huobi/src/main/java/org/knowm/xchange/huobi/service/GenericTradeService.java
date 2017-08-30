@@ -21,126 +21,171 @@ import org.knowm.xchange.exceptions.NotYetImplementedForExchangeException;
 import org.knowm.xchange.huobi.HuobiAdapters;
 import org.knowm.xchange.huobi.dto.trade.HuobiCancelOrderResult;
 import org.knowm.xchange.huobi.dto.trade.HuobiOrder;
+import org.knowm.xchange.huobi.dto.trade.HuobiOrderInfo;
 import org.knowm.xchange.huobi.dto.trade.HuobiPlaceOrderResult;
 import org.knowm.xchange.service.BaseExchangeService;
 import org.knowm.xchange.service.trade.TradeService;
 import org.knowm.xchange.service.trade.params.CancelOrderByIdParams;
 import org.knowm.xchange.service.trade.params.CancelOrderParams;
+import org.knowm.xchange.service.trade.params.DefaultCancelOrderParams;
 import org.knowm.xchange.service.trade.params.TradeHistoryParams;
+import org.knowm.xchange.service.trade.params.orders.DefaultOpenOrdersParamCurrencyPair;
+import org.knowm.xchange.service.trade.params.orders.DefaultOpenOrdersParamMultiCurrencyPair;
 import org.knowm.xchange.service.trade.params.orders.OpenOrdersParams;
+
+import static org.knowm.xchange.dto.Order.OrderType.ASK;
+import static org.knowm.xchange.dto.Order.OrderType.BID;
 
 public class GenericTradeService extends BaseExchangeService implements TradeService {
 
-  private final Map<CurrencyPair, Integer> coinTypes;
-  private static final OpenOrders noOpenOrders = new OpenOrders(Collections.<LimitOrder>emptyList());
-  private final TradeServiceRaw tradeServiceRaw;
+    private final Map<CurrencyPair, Integer> coinTypes;
+    private static final OpenOrders noOpenOrders = new OpenOrders(Collections.<LimitOrder>emptyList());
+    private final TradeServiceRaw tradeServiceRaw;
 
-  /**
-   * Constructor
-   *
-   * @param tradeServiceRaw
-   */
-  public GenericTradeService(Exchange exchange, TradeServiceRaw tradeServiceRaw) {
+    /**
+     * Constructor
+     *
+     * @param tradeServiceRaw
+     */
+    public GenericTradeService(Exchange exchange, TradeServiceRaw tradeServiceRaw) {
 
-    super(exchange);
-    this.tradeServiceRaw = tradeServiceRaw;
+        super(exchange);
+        this.tradeServiceRaw = tradeServiceRaw;
 
-    coinTypes = new HashMap<>(2);
-    coinTypes.put(CurrencyPair.BTC_CNY, 1);
-    coinTypes.put(CurrencyPair.LTC_CNY, 2);
-  }
-
-  public TradeServiceRaw getTradeServiceRaw() {
-    return this.tradeServiceRaw;
-  }
-
-  @Override
-  public OpenOrders getOpenOrders() throws IOException {
-    return getOpenOrders(createOpenOrdersParams());
-  }
-
-  @Override
-  public OpenOrders getOpenOrders(
-      OpenOrdersParams params) throws ExchangeException, NotAvailableFromExchangeException, NotYetImplementedForExchangeException, IOException {
-    // TODO use params for currency pair
-    List<LimitOrder> openOrders = new ArrayList<>();
-    for (CurrencyPair currencyPair : exchange.getExchangeMetaData().getCurrencyPairs().keySet()) {
-      HuobiOrder[] orders = tradeServiceRaw.getOrders(coinTypes.get(currencyPair));
-
-      for (int i = 0; i < orders.length; i++) {
-        openOrders.add(HuobiAdapters.adaptOpenOrder(orders[i], currencyPair));
-      }
+        coinTypes = new HashMap<>(2);
+        coinTypes.put(CurrencyPair.BTC_CNY, 1);
+        coinTypes.put(CurrencyPair.LTC_CNY, 2);
     }
 
-    if (openOrders.isEmpty()) {
-      return noOpenOrders;
+    public TradeServiceRaw getTradeServiceRaw() {
+        return this.tradeServiceRaw;
     }
 
-    return new OpenOrders(openOrders);
-  }
-
-  @Override
-  public String placeMarketOrder(MarketOrder marketOrder) throws IOException {
-
-    HuobiPlaceOrderResult result = tradeServiceRaw.placeMarketOrder(marketOrder.getType(), coinTypes.get(marketOrder.getCurrencyPair()),
-        marketOrder.getTradableAmount());
-    return HuobiAdapters.adaptPlaceOrderResult(result);
-  }
-
-  @Override
-  public String placeLimitOrder(LimitOrder limitOrder) throws IOException {
-
-    HuobiPlaceOrderResult result = tradeServiceRaw.placeLimitOrder(limitOrder.getType(), coinTypes.get(limitOrder.getCurrencyPair()),
-        limitOrder.getLimitPrice(), limitOrder.getTradableAmount());
-    return HuobiAdapters.adaptPlaceOrderResult(result);
-  }
-
-  @Override
-  public boolean cancelOrder(String orderId) throws IOException {
-
-    final long id = Long.parseLong(orderId);
-
-    HuobiCancelOrderResult result = null;
-    for (CurrencyPair currencyPair : exchange.getExchangeMetaData().getCurrencyPairs().keySet()) {
-      result = tradeServiceRaw.cancelOrder(coinTypes.get(currencyPair), id);
-
-      if (result.getCode() == 0) {
-        break;
-      } else if (result.getCode() == 26) { // Order does not exist
-        continue;
-      } else {
-        break;
-      }
+    @Override
+    public OpenOrders getOpenOrders() throws IOException {
+        return getOpenOrders(createOpenOrdersParams());
     }
-    return result != null && "success".equals(result.getResult());
-  }
 
-  @Override
-  public boolean cancelOrder(CancelOrderParams orderParams) throws ExchangeException, NotAvailableFromExchangeException, NotYetImplementedForExchangeException, IOException {
-    if (orderParams instanceof CancelOrderByIdParams) {
-      cancelOrder(((CancelOrderByIdParams) orderParams).orderId);
+    @Override
+    public OpenOrders getOpenOrders(
+            OpenOrdersParams params) throws ExchangeException, NotAvailableFromExchangeException, NotYetImplementedForExchangeException, IOException {
+        // TODO use params for currency pair
+        List<LimitOrder> openOrders = new ArrayList<>();
+        List<CurrencyPair> symbols = new ArrayList<>();
+
+        if (params instanceof DefaultOpenOrdersParamCurrencyPair) {
+            symbols.add(((DefaultOpenOrdersParamCurrencyPair) params).getCurrencyPair());
+        } else if (params instanceof DefaultOpenOrdersParamMultiCurrencyPair) {
+            symbols.addAll(((DefaultOpenOrdersParamMultiCurrencyPair) params).getCurrencyPairs());
+        } else {
+            symbols.addAll(exchange.getExchangeSymbols());
+        }
+
+
+        for (CurrencyPair currencyPair : symbols) {
+            HuobiOrder[] orders = tradeServiceRaw.getOrders(coinTypes.get(currencyPair));
+
+            for (int i = 0; i < orders.length; i++) {
+                openOrders.add(HuobiAdapters.adaptOpenOrder(orders[i], currencyPair));
+            }
+        }
+
+        if (openOrders.isEmpty()) {
+            return noOpenOrders;
+        }
+
+        return new OpenOrders(openOrders);
     }
-    return false;
-  }
 
-  @Override
-  public UserTrades getTradeHistory(TradeHistoryParams params) throws IOException {
-    throw new NotAvailableFromExchangeException();
-  }
+    @Override
+    public String placeMarketOrder(MarketOrder marketOrder) throws IOException {
 
-  @Override
-  public Collection<Order> getOrder(
-      String... orderIds) throws ExchangeException, NotAvailableFromExchangeException, NotYetImplementedForExchangeException, IOException {
-    throw new NotYetImplementedForExchangeException();
-  }
+        HuobiPlaceOrderResult result = tradeServiceRaw.placeMarketOrder(marketOrder.getType(), coinTypes.get(marketOrder.getCurrencyPair()),
+                marketOrder.getTradableAmount());
+        return HuobiAdapters.adaptPlaceOrderResult(result);
+    }
 
-  @Override
-  public TradeHistoryParams createTradeHistoryParams() {
-    throw new NotAvailableFromExchangeException();
-  }
+    @Override
+    public String placeLimitOrder(LimitOrder limitOrder) throws IOException {
 
-  @Override
-  public OpenOrdersParams createOpenOrdersParams() {
-    return null;
-  }
+        HuobiPlaceOrderResult result = tradeServiceRaw.placeLimitOrder(limitOrder.getType(), coinTypes.get(limitOrder.getCurrencyPair()),
+                limitOrder.getLimitPrice(), limitOrder.getTradableAmount());
+        return HuobiAdapters.adaptPlaceOrderResult(result);
+    }
+
+    @Override
+    public boolean cancelOrder(String orderId) throws IOException {
+
+        final long id = Long.parseLong(orderId);
+
+        HuobiCancelOrderResult result = null;
+        for (CurrencyPair currencyPair : exchange.getExchangeMetaData().getCurrencyPairs().keySet()) {
+            result = tradeServiceRaw.cancelOrder(coinTypes.get(currencyPair), id);
+
+            if (result.getCode() == 0) {
+                break;
+            } else if (result.getCode() == 26) { // Order does not exist
+                continue;
+            } else {
+                break;
+            }
+        }
+        return result != null && "success".equals(result.getResult());
+    }
+
+    @Override
+    public boolean cancelOrder(CancelOrderParams orderParams) throws ExchangeException, NotAvailableFromExchangeException, NotYetImplementedForExchangeException, IOException {
+        if (orderParams instanceof CancelOrderByIdParams) {
+          return   cancelOrder(((CancelOrderByIdParams) orderParams).orderId);
+        }else if (orderParams instanceof DefaultCancelOrderParams){
+            DefaultCancelOrderParams params = (DefaultCancelOrderParams)orderParams;
+            HuobiCancelOrderResult r = tradeServiceRaw.cancelOrder(coinTypes.get(params.getCurrencyPair()) , Long.parseLong(params.getOrderId()));
+            if ("success".equals(r.getResult())){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public UserTrades getTradeHistory(TradeHistoryParams params) throws IOException {
+        throw new NotAvailableFromExchangeException();
+    }
+
+    @Override
+    public Collection<Order> getOrder(
+            String... orderIds) throws ExchangeException, NotAvailableFromExchangeException, NotYetImplementedForExchangeException, IOException {
+        if (orderIds.length != 2) {
+            throw new ExchangeException("parameters must equal 2");
+        }
+
+        String orderId = orderIds[0];
+        CurrencyPair currencyPair = new CurrencyPair(orderIds[1]);
+
+        if (currencyPair == null){
+            throw new ExchangeException("[" + orderIds[1] +"] currency pair error");
+        }
+
+        HuobiOrderInfo orderInfo = tradeServiceRaw.getOrderInfo(Long.parseLong(orderId), coinTypes.get(currencyPair));
+        LimitOrder limitOrder = new LimitOrder.Builder(orderInfo.getType() == 1 ? BID : ASK, currencyPair)
+                .id(String.valueOf(orderInfo.getId()))
+                .tradableAmount(orderInfo.getOrderAmount())
+                .limitPrice(orderInfo.getOrderPrice())
+                .orderStatus(HuobiAdapters.adaptOrderStatus(orderInfo.getStatus()))
+                .averagePrice(orderInfo.getProcessedPrice())
+                .build();
+        List<Order> orderList = new ArrayList<>();
+        orderList.add(limitOrder);
+        return orderList;
+    }
+
+    @Override
+    public TradeHistoryParams createTradeHistoryParams() {
+        throw new NotAvailableFromExchangeException();
+    }
+
+    @Override
+    public OpenOrdersParams createOpenOrdersParams() {
+        return null;
+    }
 }
