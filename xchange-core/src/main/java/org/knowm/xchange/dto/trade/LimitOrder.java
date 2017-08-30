@@ -23,6 +23,8 @@ public class LimitOrder extends Order implements Comparable<LimitOrder> {
    * The limit price
    */
   protected final BigDecimal limitPrice;
+  protected BigDecimal originAmount;
+  protected BigDecimal dealAmount;
 
   /**
    * @param type Either BID (buying) or ASK (selling)
@@ -36,6 +38,15 @@ public class LimitOrder extends Order implements Comparable<LimitOrder> {
 
     super(type, tradableAmount, currencyPair, id, timestamp);
     this.limitPrice = limitPrice;
+  }
+
+  public LimitOrder(String id , OrderType type, BigDecimal originAmount,
+                    BigDecimal dealAmount, BigDecimal avgPrice, CurrencyPair currencyPair, BigDecimal limitPrice ,OrderStatus status ,Date timestamp) {
+
+    super(type, originAmount.subtract(dealAmount), currencyPair, id, timestamp, avgPrice , dealAmount, status);
+    this.limitPrice = limitPrice;
+    this.originAmount = originAmount;
+    this.dealAmount = dealAmount;
   }
 
   /**
@@ -61,6 +72,22 @@ public class LimitOrder extends Order implements Comparable<LimitOrder> {
   public BigDecimal getLimitPrice() {
 
     return limitPrice;
+  }
+
+  public BigDecimal getOriginAmount() {
+    return originAmount;
+  }
+
+  public void setOriginAmount(BigDecimal originAmount) {
+    this.originAmount = originAmount;
+  }
+
+  public BigDecimal getDealAmount() {
+    return dealAmount;
+  }
+
+  public void setDealAmount(BigDecimal dealAmount) {
+    this.dealAmount = dealAmount;
   }
 
   @Override
@@ -112,6 +139,8 @@ public class LimitOrder extends Order implements Comparable<LimitOrder> {
   public static class Builder extends Order.Builder {
 
     protected BigDecimal limitPrice;
+    protected BigDecimal originAmount;
+    protected BigDecimal dealAmount;
 
     public Builder(OrderType orderType, CurrencyPair currencyPair) {
 
@@ -123,10 +152,12 @@ public class LimitOrder extends Order implements Comparable<LimitOrder> {
       Builder builder = (Builder) new Builder(order.getType(), order.getCurrencyPair()).tradableAmount(order.getTradableAmount())
           .timestamp(order.getTimestamp()).id(order.getId()).flags(order.getOrderFlags()).orderStatus(order.getStatus())
           .averagePrice(order.getAveragePrice());
+
       if (order instanceof LimitOrder) {
         LimitOrder limitOrder = (LimitOrder) order;
         builder.limitPrice(limitOrder.getLimitPrice());
       }
+
       return builder;
     }
 
@@ -190,9 +221,27 @@ public class LimitOrder extends Order implements Comparable<LimitOrder> {
       return this;
     }
 
+    public Builder originAmount(BigDecimal originAmount){
+      this.originAmount = originAmount;
+      return this;
+    }
+
+    public Builder dealAmount(BigDecimal dealAmount){
+      this.dealAmount = dealAmount;
+      return this;
+    }
+
     public LimitOrder build() {
 
       LimitOrder order = new LimitOrder(orderType, tradableAmount, currencyPair, id, timestamp, limitPrice, averagePrice, null, status);
+      order.setOrderFlags(flags);
+      return order;
+    }
+
+
+    public LimitOrder build2() {
+
+      LimitOrder order = new LimitOrder(id , orderType, originAmount , dealAmount, averagePrice ,currencyPair , limitPrice, status , timestamp);
       order.setOrderFlags(flags);
       return order;
     }
