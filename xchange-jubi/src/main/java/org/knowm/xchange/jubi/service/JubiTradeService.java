@@ -20,6 +20,7 @@ import org.knowm.xchange.service.trade.params.orders.OpenOrdersParamCurrencyPair
 import org.knowm.xchange.service.trade.params.orders.OpenOrdersParams;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 
@@ -70,7 +71,7 @@ public class JubiTradeService extends JubiTradeServiceRaw implements TradeServic
   @Override
   public boolean cancelOrder(String orderId) throws IOException {
     //A specific e-coin type(CurrencyPair) should be assigned, otherwise the request would be invalid.
-    throw new NotYetImplementedForExchangeException();
+    throw new NotYetImplementedForExchangeException("Please Invoke cancelOrder(CancelOrderParams) method.");
   }
 
   @Override
@@ -78,6 +79,9 @@ public class JubiTradeService extends JubiTradeServiceRaw implements TradeServic
     if (orderParams instanceof JubiCancelOrderParams) {
       JubiCancelOrderParams params = (JubiCancelOrderParams)orderParams;
       return cancelJubiOrder(params.getCurrencyPair(), params.getOrderId());
+    }else if (orderParams instanceof DefaultCancelOrderParams){
+        DefaultCancelOrderParams cancelOrderParams = (DefaultCancelOrderParams)orderParams;
+        return cancelJubiOrder(cancelOrderParams.getCurrencyPair() , new BigDecimal(cancelOrderParams.getOrderId()));
     }
     return false;
   }
