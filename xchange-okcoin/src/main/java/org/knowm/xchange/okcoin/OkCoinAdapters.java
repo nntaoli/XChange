@@ -144,7 +144,7 @@ public final class OkCoinAdapters {
       OkCoinOrder[] orders = orderResult.getOrders();
       for (int j = 0; j < orders.length; j++) {
         OkCoinOrder singleOrder = orders[j];
-        openOrders.add(adaptOpenOrder(singleOrder));
+        openOrders.add(adaptOrder(singleOrder));
       }
     }
     return new OpenOrders(openOrders);

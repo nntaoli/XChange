@@ -154,6 +154,34 @@ public final class HuobiAdapters {
                 String.valueOf(order.getId()), new Date(order.getOrderTime() * 1000), order.getOrderPrice());
     }
 
+    public static LimitOrder adaptLimitOrder(HuobiOrder order, CurrencyPair currencyPair) {
+        return new LimitOrder.Builder(adaptOrderType(order.getType()), currencyPair)
+                .id(String.valueOf(order.getId()))
+                .limitPrice(order.getOrderPrice())
+                .originAmount(order.getOrderAmount())
+                .dealAmount(order.getProcessedAmount())
+                .averagePrice(order.getOrderPrice())
+                .orderStatus(Order.OrderStatus.NEW)
+                .timestamp(new Date(order.getOrderTime()))
+                .build2();
+    }
+
+    public static LimitOrder adaptLimitOrder(HuobiOrderInfo orderInfo, CurrencyPair currencyPair) {
+        return new LimitOrder.Builder(adaptOrderType(orderInfo.getType()), currencyPair)
+                .id(String.valueOf(orderInfo.getId()))
+                .originAmount(orderInfo.getOrderAmount())
+                .limitPrice(orderInfo.getOrderPrice())
+                .dealAmount(orderInfo.getProcessedAmount())
+                .orderStatus(HuobiAdapters.adaptOrderStatus(orderInfo.getStatus()))
+                .averagePrice(orderInfo.getProcessedPrice())
+                .timestamp(orderInfo.getTimestamp())
+                .build2();
+    }
+
+    public static OrderType adaptOrderType(int orderType){
+        return orderType == 1 ? BID : ASK;
+    }
+
     public static Order.OrderStatus adaptOrderStatus(HuobiOrderInfo.HuobiOrderStatus huobiOrderStatus) {
         Order.OrderStatus status = Order.OrderStatus.NEW;
         switch (huobiOrderStatus) {
