@@ -1,6 +1,7 @@
 package org.knowm.xchange.huobi.dto.trade;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -32,12 +33,13 @@ public class HuobiOrderInfo {
   private final BigDecimal fee;
   private final BigDecimal total;
   private final HuobiOrderStatus status;
+  private final Date timestamp;
 
   public HuobiOrderInfo(@JsonProperty("id") final long id, @JsonProperty("type") final int type,
       @JsonProperty("order_price") final BigDecimal orderPrice, @JsonProperty("order_amount") final BigDecimal orderAmount,
       @JsonProperty("processed_price") final BigDecimal processedPrice, @JsonProperty("processed_amount") final BigDecimal processedAmount,
       @JsonProperty("vot") final BigDecimal vot, @JsonProperty("fee") final BigDecimal fee, @JsonProperty("total") final BigDecimal total,
-      @JsonProperty("status") final HuobiOrderStatus status) {
+      @JsonProperty("status") final HuobiOrderStatus status , @JsonProperty("order_time") final long orderTime) {
 
     this.id = id;
     this.type = type;
@@ -49,6 +51,7 @@ public class HuobiOrderInfo {
     this.fee = fee;
     this.total = total;
     this.status = status;
+    this.timestamp = new Date(orderTime);
   }
 
   public long getId() {
@@ -91,4 +94,7 @@ public class HuobiOrderInfo {
     return status;
   }
 
+  public Date getTimestamp() {
+    return timestamp;
+  }
 }

@@ -125,10 +125,13 @@ public class BTERTradeService extends BTERTradeServiceRaw implements TradeServic
     LimitOrder limitOrder = new LimitOrder.Builder(BTERAdapters.adaptOrderType(orderStatus.getType()) , pair)
             .id(orderId)
             .limitPrice(orderStatus.getInitialRate())
-            .tradableAmount(orderStatus.getAmount())
+            .originAmount(orderStatus.getInitialAmount())
+            .dealAmount(orderStatus.getAmount())
             .averagePrice(orderStatus.getRate())
             .orderStatus(BTERAdapters.adaptOrderStatus(orderStatus.getStatus()))
-            .build();
+            .timestamp(new Date())
+            .build2();
+    
     orderList.add(limitOrder);
     return orderList;
   }

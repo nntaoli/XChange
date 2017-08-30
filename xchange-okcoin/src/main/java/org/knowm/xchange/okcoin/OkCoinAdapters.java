@@ -151,7 +151,16 @@ public final class OkCoinAdapters {
   }
 
   public static LimitOrder adaptOrder(OkCoinOrder order) {
-    return new LimitOrder(adaptOrderType(order.getType()), order.getAmount(), adaptSymbol(order.getSymbol()), String.valueOf(order.getOrderId()), order.getCreateDate(), order.getPrice(), order.getAveragePrice(), order.getDealAmount(), adaptOrderStatus(order.getStatus()));
+    LimitOrder limitOrder = new LimitOrder.Builder(adaptOrderType(order.getType()) , adaptSymbol(order.getSymbol()))
+            .id(String.valueOf(order.getOrderId()))
+            .limitPrice(order.getPrice())
+            .originAmount(order.getAmount())
+            .dealAmount(order.getDealAmount())
+            .averagePrice(order.getAveragePrice())
+            .orderStatus(adaptOrderStatus(order.getStatus()))
+            .timestamp(order.getCreateDate())
+            .build2();
+    return limitOrder;
   }
 
   public static OpenOrders adaptOpenOrdersFutures(List<OkCoinFuturesOrderResult> orderResults) {

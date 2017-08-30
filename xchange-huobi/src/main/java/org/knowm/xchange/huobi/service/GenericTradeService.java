@@ -169,11 +169,14 @@ public class GenericTradeService extends BaseExchangeService implements TradeSer
         HuobiOrderInfo orderInfo = tradeServiceRaw.getOrderInfo(Long.parseLong(orderId), coinTypes.get(currencyPair));
         LimitOrder limitOrder = new LimitOrder.Builder(orderInfo.getType() == 1 ? BID : ASK, currencyPair)
                 .id(String.valueOf(orderInfo.getId()))
-                .tradableAmount(orderInfo.getOrderAmount())
+                .originAmount(orderInfo.getOrderAmount())
                 .limitPrice(orderInfo.getOrderPrice())
+                .dealAmount(orderInfo.getProcessedAmount())
                 .orderStatus(HuobiAdapters.adaptOrderStatus(orderInfo.getStatus()))
                 .averagePrice(orderInfo.getProcessedPrice())
-                .build();
+                .timestamp(orderInfo.getTimestamp())
+                .build2();
+
         List<Order> orderList = new ArrayList<>();
         orderList.add(limitOrder);
         return orderList;
