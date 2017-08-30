@@ -1,6 +1,7 @@
 package org.knowm.xchange.bter.dto.trade;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -14,6 +15,8 @@ public class BTEROpenOrder {
   private final String buyCurrency;
   private final BigDecimal sellAmount;
   private final BigDecimal buyAmount;
+  private long timestampL;
+  private Date timestamp;
 
   /**
    * Constructor
@@ -23,13 +26,15 @@ public class BTEROpenOrder {
    * @param buyAmount amount to buy
    */
   private BTEROpenOrder(@JsonProperty("id") String id, @JsonProperty("sell_type") String sellCurrency, @JsonProperty("buy_type") String buyCurrency,
-      @JsonProperty("sell_amount") BigDecimal sellAmount, @JsonProperty("buy_amount") BigDecimal buyAmount) {
+      @JsonProperty("sell_amount") BigDecimal sellAmount, @JsonProperty("buy_amount") BigDecimal buyAmount , @JsonProperty("timestamp") long timestampL) {
 
-    this.id = id;
-    this.sellCurrency = sellCurrency;
-    this.buyCurrency = buyCurrency;
-    this.sellAmount = sellAmount;
-    this.buyAmount = buyAmount;
+      this.id = id;
+      this.sellCurrency = sellCurrency;
+      this.buyCurrency = buyCurrency;
+      this.sellAmount = sellAmount;
+      this.buyAmount = buyAmount;
+      this.timestampL = timestampL;
+      this.timestamp = new Date(timestampL * 1000L);
   }
 
   public String getId() {
@@ -57,10 +62,26 @@ public class BTEROpenOrder {
     return buyAmount;
   }
 
-  @Override
+    public long getTimestampL() {
+        return timestampL;
+    }
+
+    public void setTimestampL(long timestampL) {
+        this.timestampL = timestampL;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    @Override
   public String toString() {
 
     return "BTEROpenOrder [id=" + id + ", sellCurrency=" + sellCurrency + ", buyCurrency=" + buyCurrency + ", sellAmount=" + sellAmount
-        + ", buyAmount=" + buyAmount + "]";
+        + ", buyAmount=" + buyAmount + ", timestramp=" + timestamp + "]";
   }
 }
