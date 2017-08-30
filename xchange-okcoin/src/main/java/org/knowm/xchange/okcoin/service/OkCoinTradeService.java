@@ -22,12 +22,7 @@ import org.knowm.xchange.okcoin.OkCoinUtils;
 import org.knowm.xchange.okcoin.dto.trade.OkCoinOrderResult;
 import org.knowm.xchange.okcoin.dto.trade.OkCoinTradeResult;
 import org.knowm.xchange.service.trade.TradeService;
-import org.knowm.xchange.service.trade.params.CancelOrderByIdParams;
-import org.knowm.xchange.service.trade.params.CancelOrderParams;
-import org.knowm.xchange.service.trade.params.DefaultTradeHistoryParamPaging;
-import org.knowm.xchange.service.trade.params.TradeHistoryParamCurrencyPair;
-import org.knowm.xchange.service.trade.params.TradeHistoryParamPaging;
-import org.knowm.xchange.service.trade.params.TradeHistoryParams;
+import org.knowm.xchange.service.trade.params.*;
 import org.knowm.xchange.service.trade.params.orders.DefaultOpenOrdersParamCurrencyPair;
 import org.knowm.xchange.service.trade.params.orders.DefaultOpenOrdersParamMultiCurrencyPair;
 import org.knowm.xchange.service.trade.params.orders.OpenOrdersParams;
@@ -144,6 +139,13 @@ public class OkCoinTradeService extends OkCoinTradeServiceRaw implements TradeSe
     public boolean cancelOrder(CancelOrderParams orderParams) throws ExchangeException, NotAvailableFromExchangeException, NotYetImplementedForExchangeException, IOException {
         if (orderParams instanceof CancelOrderByIdParams) {
             cancelOrder(((CancelOrderByIdParams) orderParams).orderId);
+        }else if (orderParams instanceof DefaultCancelOrderParams){
+            DefaultCancelOrderParams cancelOrderParams = (DefaultCancelOrderParams) orderParams;
+            OkCoinTradeResult cancelResult = super.cancelOrder(Long.parseLong(cancelOrderParams.getOrderId()) ,
+                    OkCoinAdapters.adaptSymbol(cancelOrderParams.getCurrencyPair()));
+            if (Long.parseLong(cancelOrderParams.getOrderId()) == cancelResult.getOrderId()){
+                return true;
+            }
         }
         return false;
     }
@@ -215,7 +217,19 @@ public class OkCoinTradeService extends OkCoinTradeServiceRaw implements TradeSe
     @Override
     public Collection<Order> getOrder(
             String... orderIds) throws ExchangeException, NotAvailableFromExchangeException, NotYetImplementedForExchangeException, IOException {
-        throw new NotYetImplementedForExchangeException();
+
+        if (orderIds.length < 2) {
+            throw new ExchangeException("parameters is orderids and currency pair");
+        }
+
+        String symbol = OkCoinAdapters.adaptSymbol(new CurrencyPair(orderIds[orderIds.length - 1]));
+
+        OkCoinOrderResult r = super.getOrder(Long.parseLong(orderIds[0]), symbol);
+
+        List<Order> orderList = new ArrayList<>();
+        orderList.add(OkCoinAdapters.adaptOrder(r.getOrders()[0]));
+
+        return orderList;
     }
 
 }

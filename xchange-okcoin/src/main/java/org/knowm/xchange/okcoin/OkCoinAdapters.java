@@ -150,6 +150,10 @@ public final class OkCoinAdapters {
     return new OpenOrders(openOrders);
   }
 
+  public static LimitOrder adaptOrder(OkCoinOrder order) {
+    return new LimitOrder(adaptOrderType(order.getType()), order.getAmount(), adaptSymbol(order.getSymbol()), String.valueOf(order.getOrderId()), order.getCreateDate(), order.getPrice(), order.getAveragePrice(), order.getDealAmount(), adaptOrderStatus(order.getStatus()));
+  }
+
   public static OpenOrders adaptOpenOrdersFutures(List<OkCoinFuturesOrderResult> orderResults) {
     List<LimitOrder> openOrders = new ArrayList<>();
 
