@@ -59,6 +59,10 @@ public final class BTERAdapters {
     return new CurrencyPair(currencies[0], currencies[1]);
   }
 
+  public static String adaptPair(CurrencyPair pair) {
+    return pair.base.getCurrencyCode() + "_" + pair.counter.getCurrencyCode();
+  }
+
   public static Ticker adaptTicker(CurrencyPair currencyPair, BTERTicker bterTicker) {
 
     BigDecimal ask = bterTicker.getSell();
@@ -96,24 +100,24 @@ public final class BTERAdapters {
     return new OrderBook(null, asks, bids);
   }
 
-  public static LimitOrder adaptOrder(BTEROpenOrder order, Collection<CurrencyPair> currencyPairs) {
-
-    CurrencyPair possibleCurrencyPair = new CurrencyPair(order.getBuyCurrency(), order.getSellCurrency());
-    if (!currencyPairs.contains(possibleCurrencyPair)) {
-      BigDecimal price = order.getBuyAmount().divide(order.getSellAmount(), 8, RoundingMode.HALF_UP);
-      return new LimitOrder(OrderType.ASK, order.getSellAmount(), new CurrencyPair(order.getSellCurrency(), order.getBuyCurrency()), order.getId(),
-          order.getTimestamp(), price);
-    } else {
-      BigDecimal price = order.getSellAmount().divide(order.getBuyAmount(), 8, RoundingMode.HALF_UP);
-      return new LimitOrder(OrderType.BID, order.getBuyAmount(), possibleCurrencyPair, order.getId(), order.getTimestamp(), price);
-    }
+  public static LimitOrder adaptOpenOrder(BTEROpenOrder order, CurrencyPair currencyPair) {
+    LimitOrder limitOrder = new LimitOrder.Builder("sell".equals(order.getType()) ? OrderType.ASK : OrderType.BID, currencyPair)
+            .id(order.getId())
+            .limitPrice(order.getRate())
+            .originAmount(order.getAmount())
+            .dealAmount(BigDecimal.ZERO)
+            .averagePrice(BigDecimal.ZERO)
+            .orderStatus(Order.OrderStatus.NEW)
+            .timestamp(order.getTimestamp())
+            .build2();
+    return limitOrder;
   }
 
   public static OpenOrders adaptOpenOrders(BTEROpenOrders openOrders, Collection<CurrencyPair> currencyPairs) {
 
     List<LimitOrder> adaptedOrders = new ArrayList<>();
     for (BTEROpenOrder openOrder : openOrders.getOrders()) {
-      adaptedOrders.add(adaptOrder(openOrder, currencyPairs));
+      adaptedOrders.add(adaptOpenOrder(openOrder, adaptCurrencyPair(openOrder.getCurrencyPair())));
     }
 
     return new OpenOrders(adaptedOrders);

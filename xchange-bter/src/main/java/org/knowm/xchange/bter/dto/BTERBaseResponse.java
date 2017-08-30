@@ -7,7 +7,7 @@ public class BTERBaseResponse {
   private final boolean result;
   private final String message;
 
-  protected BTERBaseResponse(@JsonProperty("result") final boolean result, @JsonProperty("msg") final String message) {
+  protected BTERBaseResponse(@JsonProperty("result") final boolean result, @JsonProperty("message") final String message) {
 
     this.result = result;
     this.message = message;

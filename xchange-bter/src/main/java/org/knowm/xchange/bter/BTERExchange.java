@@ -32,6 +32,7 @@ public class BTERExchange extends BaseExchange implements Exchange {
 
     ExchangeSpecification exchangeSpecification = new ExchangeSpecification(this.getClass().getCanonicalName());
     exchangeSpecification.setSslUri("https://data.bter.com");
+    exchangeSpecification.setPlainTextUri("http://data.bter.com");
     exchangeSpecification.setHost("bter.com");
     exchangeSpecification.setExchangeName("BTER");
 
@@ -47,7 +48,7 @@ public class BTERExchange extends BaseExchange implements Exchange {
   @Override
   public void remoteInit() throws IOException {
 
-    Map<CurrencyPair, BTERMarketInfo> currencyPair2BTERMarketInfoMap = ((BTERMarketDataServiceRaw) marketDataService).getBTERMarketInfo();
-    exchangeMetaData = BTERAdapters.adaptToExchangeMetaData(currencyPair2BTERMarketInfoMap);
+    //Map<CurrencyPair, BTERMarketInfo> currencyPair2BTERMarketInfoMap = ((BTERMarketDataServiceRaw) marketDataService).getBTERMarketInfo();
+    //exchangeMetaData = BTERAdapters.adaptToExchangeMetaData(currencyPair2BTERMarketInfoMap);
   }
 }

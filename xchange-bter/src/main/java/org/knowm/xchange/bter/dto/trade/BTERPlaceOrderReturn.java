@@ -11,8 +11,8 @@ public class BTERPlaceOrderReturn extends BTERBaseResponse {
   /**
    * Constructor
    */
-  private BTERPlaceOrderReturn(@JsonProperty("result") boolean result, @JsonProperty("order_id") String anOrderId,
-      @JsonProperty("msg") String message) {
+  private BTERPlaceOrderReturn(@JsonProperty("result") boolean result, @JsonProperty("orderNumber") String anOrderId,
+      @JsonProperty("message") String message) {
 
     super(result, message);
     orderId = anOrderId;

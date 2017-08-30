@@ -15,7 +15,7 @@ import org.knowm.xchange.bter.dto.marketdata.BTERTicker;
 import org.knowm.xchange.bter.dto.marketdata.BTERTickers;
 import org.knowm.xchange.bter.dto.marketdata.BTERTradeHistory;
 
-@Path("api/1")
+@Path("api2/1")
 @Produces(MediaType.APPLICATION_JSON)
 public interface BTER {
 
@@ -36,7 +36,7 @@ public interface BTER {
   BTERTicker getTicker(@PathParam("ident") String tradeableIdentifier, @PathParam("currency") String currency) throws IOException;
 
   @GET
-  @Path("depth/{ident}_{currency}")
+  @Path("orderBook/{ident}_{currency}")
   BTERDepth getFullDepth(@PathParam("ident") String tradeableIdentifier, @PathParam("currency") String currency) throws IOException;
 
   @GET

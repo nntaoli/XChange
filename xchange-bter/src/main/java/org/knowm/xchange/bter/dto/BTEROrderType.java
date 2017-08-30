@@ -25,7 +25,7 @@ public enum BTEROrderType {
       final ObjectCodec oc = jsonParser.getCodec();
       final JsonNode node = oc.readTree(jsonParser);
       final String orderType = node.asText();
-      return BTEROrderType.valueOf(orderType.toUpperCase());
+      return BTEROrderType.valueOf(orderType.toLowerCase());
     }
   }
 }

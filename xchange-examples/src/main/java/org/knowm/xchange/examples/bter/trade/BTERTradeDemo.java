@@ -75,10 +75,11 @@ public class BTERTradeDemo {
     List<BTEROpenOrder> openOrdersList = openOrders.getOrders();
     if (!openOrdersList.isEmpty()) {
       String existingOrderId = openOrdersList.get(0).getId();
-      BTEROrderStatus orderStatus = tradeService.getBTEROrderStatus(existingOrderId);
+      String pair = openOrdersList.get(0).getCurrencyPair();
+      BTEROrderStatus orderStatus = tradeService.getBTEROrderStatus(existingOrderId , pair);
       System.out.println(orderStatus);
 
-      boolean isCancelled = tradeService.cancelOrder(existingOrderId);
+      boolean isCancelled = tradeService.cancelOrder(existingOrderId , pair);
       System.out.println(isCancelled);
     }
 

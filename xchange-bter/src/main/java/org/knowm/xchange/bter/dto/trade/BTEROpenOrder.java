@@ -11,10 +11,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class BTEROpenOrder {
 
   private final String id;
-  private final String sellCurrency;
-  private final String buyCurrency;
-  private final BigDecimal sellAmount;
-  private final BigDecimal buyAmount;
+  private final String type;
+  private final BigDecimal amount;
+  private final BigDecimal rate;
+    private final String currencyPair;
   private long timestampL;
   private Date timestamp;
 
@@ -22,45 +22,40 @@ public class BTEROpenOrder {
    * Constructor
    *
    * @param id orderId
-   * @param sellAmount amount to sell
-   * @param buyAmount amount to buy
    */
-  private BTEROpenOrder(@JsonProperty("id") String id, @JsonProperty("sell_type") String sellCurrency, @JsonProperty("buy_type") String buyCurrency,
-      @JsonProperty("sell_amount") BigDecimal sellAmount, @JsonProperty("buy_amount") BigDecimal buyAmount , @JsonProperty("timestamp") long timestampL) {
+  private BTEROpenOrder(@JsonProperty("orderNumber") String id, @JsonProperty("type") String type, @JsonProperty("status") String status,
+           @JsonProperty("currencyPair") String currencyPair ,  @JsonProperty("amount") BigDecimal amount, @JsonProperty("rate") BigDecimal rate ,
+                        @JsonProperty("timestamp") long timestampL) {
 
       this.id = id;
-      this.sellCurrency = sellCurrency;
-      this.buyCurrency = buyCurrency;
-      this.sellAmount = sellAmount;
-      this.buyAmount = buyAmount;
+      this.type = type;
+      this.rate = rate;
+      this.amount = amount;
+      this.currencyPair = currencyPair;
       this.timestampL = timestampL;
       this.timestamp = new Date(timestampL * 1000L);
   }
 
-  public String getId() {
+    public String getId() {
 
-    return id;
-  }
+        return id;
+    }
 
-  public String getSellCurrency() {
+    public String getType() {
+        return type;
+    }
 
-    return sellCurrency;
-  }
+    public BigDecimal getAmount() {
+        return amount;
+    }
 
-  public String getBuyCurrency() {
+    public BigDecimal getRate() {
+        return rate;
+    }
 
-    return buyCurrency;
-  }
-
-  public BigDecimal getSellAmount() {
-
-    return sellAmount;
-  }
-
-  public BigDecimal getBuyAmount() {
-
-    return buyAmount;
-  }
+    public String getCurrencyPair() {
+        return currencyPair;
+    }
 
     public long getTimestampL() {
         return timestampL;
@@ -81,7 +76,7 @@ public class BTEROpenOrder {
     @Override
   public String toString() {
 
-    return "BTEROpenOrder [id=" + id + ", sellCurrency=" + sellCurrency + ", buyCurrency=" + buyCurrency + ", sellAmount=" + sellAmount
-        + ", buyAmount=" + buyAmount + ", timestramp=" + timestamp + "]";
+    return "BTEROpenOrder [id=" + id + ", type=" + type +  ", amount=" + amount
+        + ", rate=" + rate + ", timestramp=" + timestamp + "]";
   }
 }

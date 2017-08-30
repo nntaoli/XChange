@@ -1,6 +1,7 @@
 package org.knowm.xchange.bter.dto.trade;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 import org.knowm.xchange.bter.BTERAdapters;
 import org.knowm.xchange.bter.dto.BTERBaseResponse;
@@ -17,7 +18,7 @@ public class BTEROrderStatus extends BTERBaseResponse {
   private final BTEROrderStatusInfo orderStatusInfo;
 
   private BTEROrderStatus(@JsonProperty("order") BTEROrderStatusInfo orderStatusInfo, @JsonProperty("result") boolean result,
-      @JsonProperty("msg") String msg) {
+      @JsonProperty("message") String msg) {
 
     super(result, msg);
     this.orderStatusInfo = orderStatusInfo;
@@ -63,6 +64,10 @@ public class BTEROrderStatus extends BTERBaseResponse {
     return orderStatusInfo.getInitialAmount();
   }
 
+  public Date getTimestamp(){
+    return new Date(orderStatusInfo.getTimestamp());
+  }
+
   public String toString() {
 
     return orderStatusInfo.toString();
@@ -78,19 +83,21 @@ public class BTEROrderStatus extends BTERBaseResponse {
     private final BigDecimal amount;
     private final BigDecimal initialRate;
     private final BigDecimal initialAmount;
+    private final long timestamp;
 
-    private BTEROrderStatusInfo(@JsonProperty("id") String id, @JsonProperty("status") String status, @JsonProperty("pair") String currencyPair,
-        @JsonProperty("type") BTEROrderType type, @JsonProperty("rate") BigDecimal rate, @JsonProperty("amount") BigDecimal amount,
-        @JsonProperty("initial_rate") BigDecimal initialRate, @JsonProperty("initial_amount") BigDecimal initialAmount) {
+    private BTEROrderStatusInfo(@JsonProperty("orderNumber") String id, @JsonProperty("status") String status, @JsonProperty("currencyPair") String currencyPair,
+        @JsonProperty("type") String type, @JsonProperty("filledRate") BigDecimal rate, @JsonProperty("filledAmount") BigDecimal amount,
+        @JsonProperty("initialRate") BigDecimal initialRate, @JsonProperty("initialAmount") BigDecimal initialAmount ,@JsonProperty("timestamp") long timestamp) {
 
       this.id = id;
       this.status = status;
       this.currencyPair = BTERAdapters.adaptCurrencyPair(currencyPair);
-      this.type = type;
+      this.type = type.equals("buy") ? BTEROrderType.BUY : BTEROrderType.SELL;
       this.rate = rate;
       this.amount = amount;
       this.initialRate = initialRate;
       this.initialAmount = initialAmount;
+      this.timestamp = timestamp;
     }
 
     public String getId() {
@@ -131,6 +138,10 @@ public class BTEROrderStatus extends BTERBaseResponse {
     public BigDecimal getInitialAmount() {
 
       return initialAmount;
+    }
+
+    public long getTimestamp() {
+      return timestamp;
     }
 
     @Override

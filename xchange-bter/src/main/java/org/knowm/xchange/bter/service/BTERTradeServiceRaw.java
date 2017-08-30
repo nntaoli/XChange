@@ -69,9 +69,9 @@ public class BTERTradeServiceRaw extends BTERBaseService {
     return handleResponse(orderId).getOrderId();
   }
 
-  public boolean cancelOrder(String orderId) throws IOException {
+  public boolean cancelOrder(String orderId , String currencyPair) throws IOException {
 
-    BTERBaseResponse cancelOrderResult = bter.cancelOrder(orderId, apiKey, signatureCreator, exchange.getNonceFactory());
+    BTERBaseResponse cancelOrderResult = bter.cancelOrder(orderId,currencyPair, apiKey, signatureCreator, exchange.getNonceFactory());
 
     return handleResponse(cancelOrderResult).isResult();
   }
@@ -83,9 +83,9 @@ public class BTERTradeServiceRaw extends BTERBaseService {
     return handleResponse(bterOpenOrdersReturn);
   }
 
-  public BTEROrderStatus getBTEROrderStatus(String orderId) throws IOException {
+  public BTEROrderStatus getBTEROrderStatus(String orderId , String currencyPair) throws IOException {
 
-    BTEROrderStatus orderStatus = bter.getOrderStatus(orderId, apiKey, signatureCreator, exchange.getNonceFactory());
+    BTEROrderStatus orderStatus = bter.getOrderStatus(orderId, currencyPair, apiKey, signatureCreator, exchange.getNonceFactory());
 
     return handleResponse(orderStatus);
   }

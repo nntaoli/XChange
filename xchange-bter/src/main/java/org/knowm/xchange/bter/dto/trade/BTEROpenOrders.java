@@ -20,7 +20,7 @@ public class BTEROpenOrders extends BTERBaseResponse {
    * @param orders
    * @param msg
    */
-  public BTEROpenOrders(@JsonProperty("result") Boolean result, @JsonProperty("orders") List<BTEROpenOrder> orders, @JsonProperty("msg") String msg) {
+  public BTEROpenOrders(@JsonProperty("result") Boolean result, @JsonProperty("orders") List<BTEROpenOrder> orders, @JsonProperty("message") String msg) {
 
     super(result, msg);
     this.orders = orders;

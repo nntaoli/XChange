@@ -73,8 +73,7 @@ public class BTERTradeService extends BTERTradeServiceRaw implements TradeServic
 
   @Override
   public boolean cancelOrder(String orderId) throws IOException {
-
-    return super.cancelOrder(orderId);
+    throw new NotYetImplementedForExchangeException("Please Invoke cancelOrder(CancelOrderParams)");
   }
 
   @Override
@@ -83,7 +82,8 @@ public class BTERTradeService extends BTERTradeServiceRaw implements TradeServic
       return cancelOrder(((CancelOrderByIdParams) orderParams).orderId);
     } else if (orderParams instanceof DefaultCancelOrderParams){
       DefaultCancelOrderParams defaultCancelOrderParams = (DefaultCancelOrderParams)orderParams;
-      return super.cancelOrder(defaultCancelOrderParams.getOrderId());
+      String currencyPair = BTERAdapters.adaptPair(defaultCancelOrderParams.getCurrencyPair());
+      return super.cancelOrder(defaultCancelOrderParams.getOrderId() , currencyPair);
     }
     return false;
   }
@@ -119,7 +119,7 @@ public class BTERTradeService extends BTERTradeServiceRaw implements TradeServic
     }
     String orderId = orderIds[0];
     CurrencyPair pair = new CurrencyPair(orderIds[1]);
-    BTEROrderStatus orderStatus = super.getBTEROrderStatus(orderId);
+    BTEROrderStatus orderStatus = super.getBTEROrderStatus(orderId , BTERAdapters.adaptPair(pair));
 
     List<Order> orderList = new ArrayList<>();
     LimitOrder limitOrder = new LimitOrder.Builder(BTERAdapters.adaptOrderType(orderStatus.getType()) , pair)
@@ -129,9 +129,9 @@ public class BTERTradeService extends BTERTradeServiceRaw implements TradeServic
             .dealAmount(orderStatus.getAmount())
             .averagePrice(orderStatus.getRate())
             .orderStatus(BTERAdapters.adaptOrderStatus(orderStatus.getStatus()))
-            .timestamp(new Date())
+            .timestamp(orderStatus.getTimestamp())
             .build2();
-    
+
     orderList.add(limitOrder);
     return orderList;
   }
