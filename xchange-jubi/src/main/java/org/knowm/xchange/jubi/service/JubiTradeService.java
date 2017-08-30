@@ -141,18 +141,7 @@ public class JubiTradeService extends JubiTradeServiceRaw implements TradeServic
     }
 
     List<Order> orders = new ArrayList<>();
-    LimitOrder limitOrder = new LimitOrder.Builder(
-            orderStatus.getType() == JubiOrderType.Buy ? Order.OrderType.BID : Order.OrderType.ASK , currencyPair)
-            .id(orderStatus.getId().toPlainString())
-            .originAmount(orderStatus.getAmountOriginal())
-            .limitPrice(orderStatus.getPrice())
-            .dealAmount(orderStatus.getAmountOriginal().subtract(orderStatus.getAmountOutstanding()))
-            .averagePrice(orderStatus.getAvgPrice())
-            .orderStatus(JubiAdapters.adaptOrderStatus(orderStatus.getStatus()))
-            .timestamp(orderStatus.getDatetime())
-            .build2();
-
-      orders.add(limitOrder);
+    orders.add(JubiAdapters.adaptLimitOrder(orderStatus,currencyPair));
     return orders;
   }
 

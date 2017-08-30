@@ -97,10 +97,31 @@ public class JubiAdapters {
   }
 
   public static LimitOrder adaptLimitOrder(JubiOrder jubiOrder, CurrencyPair currencyPair) {
-    final Order.OrderType orderType = jubiOrder.getType() == JubiOrderType.Buy ? Order.OrderType.BID : Order.OrderType.ASK;
-    final BigDecimal cumulativeAmount = jubiOrder.getAmountOriginal().subtract(jubiOrder.getAmountOutstanding());
-    return new LimitOrder(orderType, jubiOrder.getAmountOriginal(), currencyPair, jubiOrder.getId().toPlainString(),
-            jubiOrder.getDatetime(), jubiOrder.getPrice(), null, cumulativeAmount, null);
+    LimitOrder limitOrder = new LimitOrder.Builder(adaptOrderType(jubiOrder.getType()) , currencyPair)
+            .id(jubiOrder.getId().toPlainString())
+            .limitPrice(jubiOrder.getPrice())
+            .originAmount(jubiOrder.getAmountOriginal())
+            .averagePrice(BigDecimal.ZERO)
+            .dealAmount(jubiOrder.getAmountOriginal().subtract(jubiOrder.getAmountOutstanding()))
+            .orderStatus(Order.OrderStatus.NEW)
+            .timestamp(jubiOrder.getDatetime())
+            .build2();
+
+    return limitOrder;
+  }
+
+  public static LimitOrder adaptLimitOrder(JubiOrderStatus jubiOrder, CurrencyPair currencyPair) {
+    LimitOrder limitOrder = new LimitOrder.Builder(adaptOrderType(jubiOrder.getType()) , currencyPair)
+            .id(jubiOrder.getId().toPlainString())
+            .limitPrice(jubiOrder.getPrice())
+            .originAmount(jubiOrder.getAmountOriginal())
+            .averagePrice(jubiOrder.getAvgPrice())
+            .dealAmount(jubiOrder.getAmountOriginal().subtract(jubiOrder.getAmountOutstanding()))
+            .orderStatus(adaptOrderStatus(jubiOrder.getStatus()))
+            .timestamp(jubiOrder.getDatetime())
+            .build2();
+
+    return limitOrder;
   }
 
   public static OpenOrders adaptOpenOrders(JubiOrderHistory jubiOrderHistory, CurrencyPair currencyPair) {
@@ -112,6 +133,10 @@ public class JubiAdapters {
 
     }
     return new OpenOrders(limitOrders);
+  }
+
+  public static Order.OrderType adaptOrderType(JubiOrderType type) {
+    return type == JubiOrderType.Buy ? Order.OrderType.BID : Order.OrderType.ASK;
   }
 
   public static Order.OrderStatus adaptOrderStatus(JubiStatusType statusType){
